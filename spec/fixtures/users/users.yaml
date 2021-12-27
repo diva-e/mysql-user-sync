@@ -1,0 +1,46 @@
+---
+# mysql username @ host
+"'test'@'%'":
+  ensure: present
+  replicate: false
+  password_hash: 61111A4A85FF8B9B20E90B56177A551683BFBE7B
+  max_user_connections: 200 #unlimited
+  grants:
+    - table: "*.*" # Set rights globally for all tables/databases.
+      rights:
+        - ALL PRIVILEGES
+        - GRANT OPTION
+
+"'test2'@'%'":
+  ensure: present
+  replicate: false
+  password_hash: 61111A4A85FF8B9B20E90B56177A551683BFBE7B
+  max_user_connections: 10
+  grants:
+    - table: "*.*" # Set rights globally for all tables/databases.
+      rights:
+        - UPDATE
+        - SELECT
+
+"'poweruser'@'10.%'":
+  ensure: present
+  replicate: false
+  password_hash: 61111A4A85FF8B9B20E90B56177A551683BFBE7B
+  grants:
+    - table: "*.*" # Set rights globally for all tables/databases.
+      rights:
+        - UPDATE
+        - SELECT
+        - DROP
+        - GRANT OPTION
+    - table: "mysql.*"
+      rights:
+        - UPDATE
+        - SELECT
+
+"'dropme'@'%'":
+  ensure: absent
+  replicate: false
+  password_hash:
+  max_user_connections: 10
+  grants:

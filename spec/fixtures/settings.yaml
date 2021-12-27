@@ -1,0 +1,15 @@
+mysql_connection:
+  user: root
+  password: root
+  host: mysql # gitlab-ci service hostname
+
+# these users are untouched and remain as it is in mysql
+ignore_user:
+    - root@localhost
+    - root@%
+    - debian-sys-maint@localhost
+
+# write these report files for monitoring etc..
+reports:
+  managed_user: /var/opt/mysql_managed_user.list
+  unmanaged_user: /var/opt/mysql_unmanaged_user.list

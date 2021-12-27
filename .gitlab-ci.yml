@@ -1,0 +1,76 @@
+#### Templates
+####
+# ci runner which runs in an docker image
+.gitlabci_docker_image: &gitlabci_docker_image
+  tags:
+    - docker-engine
+
+.gitlabci_integration_test: &gitlabci_integration_test
+  stage: integration
+  tags:
+    - docker-engine
+  image: ubuntu:bionic
+  variables:
+    # Configure mysql environment variables (https://hub.docker.com/r/_/mysql/)
+    MYSQL_HOST: mysql # this is the hostname which will be provided by gitlab ci linked service
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_USER: dropme
+    MYSQL_PASSWORD: dropme
+  script:
+    # run two times
+    - ruby ./main.rb spec/fixtures/settings.yaml spec/fixtures/users
+    # test output, should only generate reports on second run
+    - test "$(ruby ./main.rb spec/fixtures/settings.yaml spec/fixtures/users)" = '"Generate Reports"'
+    - bundle exec rake spec
+
+#### General options
+####
+stages:
+  - test
+  - integration
+
+before_script:
+  - apt-get update
+  - apt-get -y install libmysqlclient-dev libssl-dev bundler ruby-dev ruby-mysql2
+  - ruby -v
+  - which ruby
+  - rm Gemfile.lock
+  - bundle install
+
+test:bionic:
+  <<: *gitlabci_docker_image
+  stage: test
+  image: ubuntu:bionic
+  script:
+    - bundle exec rake rubocop
+    - bundle exec rake spec
+test:focal:
+  <<: *gitlabci_docker_image
+  stage: test
+  image: ubuntu:focal
+  script:
+    - bundle exec rake rubocop
+    - bundle exec rake spec
+
+## Full integration test
+# Test against real databases
+integration:mysql-5.7.28:
+  <<: *gitlabci_integration_test
+  services:
+    - mysql:5.7.28
+integration:mysql-5.7:
+  <<: *gitlabci_integration_test
+  services:
+    - mysql:5.7
+integration:mysql-8.0.21:
+  <<: *gitlabci_integration_test
+  services:
+    - mysql:8.0.21
+integration:mysql-8.0.22:
+  <<: *gitlabci_integration_test
+  services:
+    - mysql:8.0.22
+integration:mysql-8.0:
+  <<: *gitlabci_integration_test
+  services:
+    - mysql:8.0
